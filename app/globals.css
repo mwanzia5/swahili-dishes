@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
+
+@plugin "@tailwindcss/container-queries";
+@plugin "@tailwindcss/typography";
 
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
