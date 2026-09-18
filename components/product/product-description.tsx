@@ -1,29 +1,40 @@
 import { AddToCart } from "components/cart/add-to-cart";
-import Price from "components/price";
+import { FavouriteButton } from "./favourite-button";
+import { formatPrice } from "lib/utils";
 import Prose from "components/prose";
-import { Product } from "lib/shopify/types";
+import type { Product, ProductVariant } from "lib/insforge/types";
 import { VariantSelector } from "./variant-selector";
 
-export function ProductDescription({ product }: { product: Product }) {
+export function ProductDescription({
+  product,
+  favourited = false,
+  signedIn = false,
+}: {
+  product: Product;
+  favourited?: boolean;
+  signedIn?: boolean;
+}) {
+  const variants = (product.variants as ProductVariant[]) ?? [];
+
   return (
     <>
-      <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
-        <h1 className="mb-2 text-5xl font-medium">{product.title}</h1>
-        <div className="mr-auto w-auto rounded-full bg-blue-600 p-2 text-sm text-white">
-          <Price
-            amount={product.priceRange.maxVariantPrice.amount}
-            currencyCode={product.priceRange.maxVariantPrice.currencyCode}
-          />
+      <div className="mb-6 flex flex-col border-b pb-6 border-neutral-800">
+        <h1 className="mb-2 text-5xl font-medium text-white">{product.name}</h1>
+        <div className="mr-auto w-auto rounded-full bg-[var(--color-gold-400)] p-2 text-sm text-white font-medium">
+          {formatPrice(product.price)}
         </div>
       </div>
-      <VariantSelector options={product.options} variants={product.variants} />
-      {product.descriptionHtml ? (
+      <VariantSelector variants={variants} />
+      {product.description ? (
         <Prose
-          className="mb-6 text-sm leading-tight dark:text-white/[60%]"
-          html={product.descriptionHtml}
+          className="mb-6 text-sm leading-tight text-white/60"
+          html={product.description}
         />
       ) : null}
       <AddToCart product={product} />
+      {signedIn ? (
+        <FavouriteButton productId={product.id} initialFavourite={favourited} />
+      ) : null}
     </>
   );
 }

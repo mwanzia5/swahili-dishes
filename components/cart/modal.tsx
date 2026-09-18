@@ -4,53 +4,40 @@ import clsx from "clsx";
 import { Dialog, Transition } from "@headlessui/react";
 import { ShoppingCartIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import LoadingDots from "components/loading-dots";
-import Price from "components/price";
-import { DEFAULT_OPTION } from "lib/constants";
-import { createUrl } from "lib/utils";
+import { createUrl, formatPrice } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
-import { createCartAndSetCookie, redirectToCheckout } from "./actions";
 import { useCart } from "./cart-context";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
 import OpenCart from "./open-cart";
-
-type MerchandiseSearchParams = {
-  [key: string]: string;
-};
+import type { Product } from "lib/insforge/types";
 
 export default function CartModal() {
   const { cart, updateCartItem } = useCart();
   const [isOpen, setIsOpen] = useState(false);
-  const quantityRef = useRef(cart?.totalQuantity);
+  const quantityRef = useRef(cart?.total_quantity);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
   useEffect(() => {
-    if (!cart) {
-      createCartAndSetCookie();
-    }
-  }, [cart]);
-
-  useEffect(() => {
     if (
-      cart?.totalQuantity &&
-      cart?.totalQuantity !== quantityRef.current &&
-      cart?.totalQuantity > 0
+      cart?.total_quantity &&
+      cart.total_quantity !== quantityRef.current &&
+      cart.total_quantity > 0
     ) {
       if (!isOpen) {
         setIsOpen(true);
       }
-      quantityRef.current = cart?.totalQuantity;
+      quantityRef.current = cart.total_quantity;
     }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
+  }, [isOpen, cart?.total_quantity, quantityRef]);
 
   return (
     <>
       <button aria-label="Open cart" onClick={openCart}>
-        <OpenCart quantity={cart?.totalQuantity} />
+        <OpenCart quantity={cart?.total_quantity} />
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
@@ -82,7 +69,7 @@ export default function CartModal() {
                 </button>
               </div>
 
-              {!cart || cart.lines.length === 0 ? (
+              {!cart || cart.items.length === 0 ? (
                 <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
                   <ShoppingCartIcon className="h-16" />
                   <p className="mt-6 text-center text-2xl font-bold">
@@ -92,33 +79,23 @@ export default function CartModal() {
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
                   <ul className="grow overflow-auto py-4">
-                    {cart.lines
-                      .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                          b.merchandise.product.title,
-                        ),
-                      )
+                    {cart.items
+                      .sort((a, b) => {
+                        const aTitle = (a.product as any)?.name ?? "";
+                        const bTitle = (b.product as any)?.name ?? "";
+                        return aTitle.localeCompare(bTitle);
+                      })
                       .map((item, i) => {
-                        const merchandiseSearchParams =
-                          {} as MerchandiseSearchParams;
-
-                        item.merchandise.selectedOptions.forEach(
-                          ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                              merchandiseSearchParams[name.toLowerCase()] =
-                                value;
-                            }
-                          },
-                        );
-
-                        const merchandiseUrl = createUrl(
-                          `/product/${item.merchandise.product.handle}`,
-                          new URLSearchParams(merchandiseSearchParams),
-                        );
+                        const product = item.product as any as Product | undefined;
+                        const slug = product?.slug ?? product?.id ?? "";
+                        const productName = product?.name ?? item.product_id;
+                        const productImage =
+                          (product?.images as any)?.[0]?.url ?? "/images/placeholder.webp";
+                        const lineTotal = parseFloat(item.unit_price ?? "0") * (item.quantity ?? 1);
 
                         return (
                           <li
-                            key={i}
+                            key={item.id ?? i}
                             className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
                           >
                             <div className="relative flex w-full flex-row justify-between px-1 py-4">
@@ -134,42 +111,29 @@ export default function CartModal() {
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
-                                    alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
-                                    }
-                                    src={
-                                      item.merchandise.product.featuredImage.url
-                                    }
+                                    alt={productName}
+                                    src={productImage}
                                   />
                                 </div>
                                 <Link
-                                  href={merchandiseUrl}
+                                  href={`/product/${slug}`}
                                   onClick={closeCart}
                                   className="z-30 ml-2 flex flex-row space-x-4"
                                 >
                                   <div className="flex flex-1 flex-col text-base">
                                     <span className="leading-tight">
-                                      {item.merchandise.product.title}
+                                      {productName}
                                     </span>
-                                    {item.merchandise.title !==
-                                    DEFAULT_OPTION ? (
-                                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                        {item.merchandise.title}
-                                      </p>
-                                    ) : null}
+                                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                      {formatPrice(item.unit_price)}
+                                    </p>
                                   </div>
                                 </Link>
                               </div>
                               <div className="flex h-16 flex-col justify-between">
-                                <Price
-                                  className="flex justify-end space-y-2 text-right text-sm"
-                                  amount={item.cost.totalAmount.amount}
-                                  currencyCode={
-                                    item.cost.totalAmount.currencyCode
-                                  }
-                                />
+                                <p className="text-right text-sm font-medium">
+                                  {formatPrice(lineTotal.toString())}
+                                </p>
                                 <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
                                   <EditItemQuantityButton
                                     item={item}
@@ -195,29 +159,33 @@ export default function CartModal() {
                   </ul>
                   <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
-                      <p>Taxes</p>
-                      <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalTaxAmount.amount}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                      />
+                      <p>Subtotal</p>
+                      <p className="text-right text-base text-black dark:text-white">
+                        {formatPrice(cart.subtotal)}
+                      </p>
                     </div>
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Shipping</p>
-                      <p className="text-right">Calculated at checkout</p>
+                      <p>Delivery</p>
+                      <p className="text-right">
+                        {cart.delivery_fee > 0
+                          ? formatPrice(cart.delivery_fee)
+                          : "Calculated at checkout"}
+                      </p>
                     </div>
                     <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                       <p>Total</p>
-                      <Price
-                        className="text-right text-base text-black dark:text-white"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
+                      <p className="text-right text-base text-black dark:text-white">
+                        {formatPrice(cart.total)}
+                      </p>
                     </div>
                   </div>
-                  <form action={redirectToCheckout}>
-                    <CheckoutButton />
-                  </form>
+                  <Link
+                    href="/checkout"
+                    onClick={closeCart}
+                    className="block w-full rounded-full bg-[var(--color-gold-400)] p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+                  >
+                    Proceed to Checkout
+                  </Link>
                 </div>
               )}
             </Dialog.Panel>
@@ -238,19 +206,5 @@ function CloseCart({ className }: { className?: string }) {
         )}
       />
     </div>
-  );
-}
-
-function CheckoutButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
-      type="submit"
-      disabled={pending}
-    >
-      {pending ? <LoadingDots className="bg-white" /> : "Proceed to Checkout"}
-    </button>
   );
 }

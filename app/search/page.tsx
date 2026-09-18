@@ -1,7 +1,7 @@
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
 import { defaultSort, sorting } from "lib/constants";
-import { getProducts } from "lib/shopify";
+import { searchProducts, getProducts } from "lib/insforge/storefront";
 
 export const metadata = {
   title: "Search",
@@ -13,10 +13,18 @@ export default async function SearchPage(props: {
 }) {
   const searchParams = await props.searchParams;
   const { sort, q: searchValue } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } =
+  const { sort: sortCol, order } =
     sorting.find((item) => item.slug === sort) || defaultSort;
 
-  const products = await getProducts({ sortKey, reverse, query: searchValue });
+  let products;
+  if (searchValue) {
+    const result = await searchProducts(searchValue, { sort: sortCol, order });
+    products = result.products;
+  } else {
+    const result = await getProducts();
+    products = result;
+  }
+
   const resultsText = products.length > 1 ? "results" : "result";
 
   return (

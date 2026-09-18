@@ -37,3 +37,28 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.aagents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+
+# Legacy / static site backup
+bahari-tamu-website/
+
+# Skills lock
+skills-lock.json
+
+# Agent configs
+.gemini/
+.jolli/

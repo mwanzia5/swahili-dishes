@@ -5,11 +5,24 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useEffect, useState } from "react";
 
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Menu } from "lib/shopify/types";
+import type { MenuItem } from "lib/constants";
 import Search, { SearchSkeleton } from "./search";
 
-export default function MobileMenu({ menu }: { menu: Menu[] }) {
+function MenuToggle({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Open mobile menu"
+      className="flex flex-col gap-[5px] rounded-md border border-indigo-line bg-transparent p-1.5 transition-colors hover:border-gold-400"
+    >
+      <span className="block h-[2px] w-6 bg-cream-100" />
+      <span className="block h-[2px] w-6 bg-cream-100" />
+      <span className="block h-[2px] w-6 bg-cream-100" />
+    </button>
+  );
+}
+
+export default function MobileMenu({ menu }: { menu: MenuItem[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -18,9 +31,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setIsOpen(false);
-      }
+      if (window.innerWidth > 768) setIsOpen(false);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -32,15 +43,9 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
 
   return (
     <>
-      <button
-        onClick={openMobileMenu}
-        aria-label="Open mobile menu"
-        className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors md:hidden dark:border-neutral-700 dark:text-white"
-      >
-        <Bars3Icon className="h-4" />
-      </button>
+      <MenuToggle onClick={openMobileMenu} />
       <Transition show={isOpen}>
-        <Dialog onClose={closeMobileMenu} className="relative z-50">
+        <Dialog onClose={closeMobileMenu} className="relative z-70">
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"
@@ -54,21 +59,23 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           </Transition.Child>
           <Transition.Child
             as={Fragment}
-            enter="transition-all ease-in-out duration-300"
-            enterFrom="translate-x-[-100%]"
+            enter="transition-all ease-in-out duration-350"
+            enterFrom="translate-x-full"
             enterTo="translate-x-0"
-            leave="transition-all ease-in-out duration-200"
+            leave="transition-all ease-in-out duration-250"
             leaveFrom="translate-x-0"
-            leaveTo="translate-x-[-100%]"
+            leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col bg-white pb-6 dark:bg-black">
-              <div className="p-4">
+            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-[min(78vw,320px)] flex-col border-l border-indigo-line bg-indigo-950 pb-6">
+              <div className="p-8 pt-24">
                 <button
-                  className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white"
+                  className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-indigo-line text-cream-100 transition-colors hover:border-gold-400"
                   onClick={closeMobileMenu}
                   aria-label="Close mobile menu"
                 >
-                  <XMarkIcon className="h-6" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
                 </button>
 
                 <div className="mb-4 w-full">
@@ -77,16 +84,14 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </Suspense>
                 </div>
                 {menu.length ? (
-                  <ul className="flex w-full flex-col">
-                    {menu.map((item: Menu) => (
-                      <li
-                        className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white"
-                        key={item.title}
-                      >
+                  <ul className="flex w-full flex-col gap-5.5">
+                    {menu.map((item) => (
+                      <li key={item.title}>
                         <Link
                           href={item.path}
                           prefetch={true}
                           onClick={closeMobileMenu}
+                          className="text-xl text-cream-300 transition-colors hover:text-cream-050"
                         >
                           {item.title}
                         </Link>

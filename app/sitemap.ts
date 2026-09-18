@@ -1,5 +1,5 @@
-import { getCollections, getPages, getProducts } from "lib/shopify";
-import { baseUrl, validateEnvironmentVariables } from "lib/utils";
+import { getProducts, getCategories } from "lib/insforge/storefront";
+import { baseUrl } from "lib/utils";
 import { MetadataRoute } from "next";
 
 type Route = {
@@ -10,31 +10,22 @@ type Route = {
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  validateEnvironmentVariables();
-
-  const routesMap = [""].map((route) => ({
+  const routesMap = ["", "/menu", "/recipes", "/about", "/contact"].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString(),
   }));
 
-  const collectionsPromise = getCollections().then((collections) =>
-    collections.map((collection) => ({
-      url: `${baseUrl}${collection.path}`,
-      lastModified: collection.updatedAt,
+  const categoriesPromise = getCategories().then((categories) =>
+    categories.map((cat) => ({
+      url: `${baseUrl}/menu/${cat.slug}`,
+      lastModified: cat.updated_at ?? new Date().toISOString(),
     })),
   );
 
-  const productsPromise = getProducts({}).then((products) =>
+  const productsPromise = getProducts().then((products) =>
     products.map((product) => ({
-      url: `${baseUrl}/product/${product.handle}`,
-      lastModified: product.updatedAt,
-    })),
-  );
-
-  const pagesPromise = getPages().then((pages) =>
-    pages.map((page) => ({
-      url: `${baseUrl}/${page.handle}`,
-      lastModified: page.updatedAt,
+      url: `${baseUrl}/product/${product.slug}`,
+      lastModified: product.updated_at ?? new Date().toISOString(),
     })),
   );
 
@@ -42,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     fetchedRoutes = (
-      await Promise.all([collectionsPromise, productsPromise, pagesPromise])
+      await Promise.all([categoriesPromise, productsPromise])
     ).flat();
   } catch (error) {
     throw JSON.stringify(error, null, 2);

@@ -1,4 +1,4 @@
-import { getCollection, getCollectionProducts } from "lib/shopify";
+import { getProductsByCategorySlug } from "lib/insforge/storefront";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -10,16 +10,13 @@ export async function generateMetadata(props: {
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const collection = await getCollection(params.collection);
+  const { products } = await getProductsByCategorySlug(params.collection, { limit: 1 });
 
-  if (!collection) return notFound();
+  if (products.length === 0) return notFound();
 
   return {
-    title: collection.seo?.title || collection.title,
-    description:
-      collection.seo?.description ||
-      collection.description ||
-      `${collection.title} products`,
+    title: params.collection.charAt(0).toUpperCase() + params.collection.slice(1),
+    description: `Browse our ${params.collection} dishes`,
   };
 }
 
@@ -30,12 +27,12 @@ export default async function CategoryPage(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const { sort } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } =
+  const { sort: sortCol, order } =
     sorting.find((item) => item.slug === sort) || defaultSort;
-  const products = await getCollectionProducts({
-    collection: params.collection,
-    sortKey,
-    reverse,
+
+  const { products } = await getProductsByCategorySlug(params.collection, {
+    sort: sortCol,
+    order,
   });
 
   return (
