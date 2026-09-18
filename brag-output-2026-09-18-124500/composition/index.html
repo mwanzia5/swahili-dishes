@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Swahili Dishes — Brag Video</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #0f1626; color: #faf6ee; font-family: 'Work Sans', Arial, sans-serif; overflow: hidden; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .clip { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+      /* Scene 1 — Hook */
+      #scene-hook { background: #0f1626; flex-direction: column; gap: 16px; }
+      #hook-dish { width: 800px; height: 500px; border-radius: 24px; object-fit: cover; opacity: 0; transform: scale(1.1); }
+      #hook-text { font-family: 'Fraunces', Georgia, serif; font-size: 120px; font-weight: 900; letter-spacing: -2px; color: #eab659; opacity: 0; }
+      #hook-sub { font-size: 28px; color: #e6dcc4; opacity: 0; margin-top: -8px; }
+      #hook-price { font-size: 36px; font-weight: 600; color: #eab659; opacity: 0; margin-top: 8px; }
+      #hook-line { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); width: 0; height: 3px; background: #eab659; }
+
+      /* Scene 2 — Dish Carousel */
+      #scene-carousel { background: #0f1626; flex-direction: row; gap: 40px; padding: 0 120px; }
+      .dish-card { width: 480px; height: 600px; border-radius: 20px; overflow: hidden; border: 2px solid rgba(234,182,89,0.2); opacity: 0; transform: translateX(100px); position: relative; }
+      .dish-card img { width: 100%; height: 380px; object-fit: cover; }
+      .dish-card .dish-info { padding: 20px 24px; background: #16203a; }
+      .dish-card .dish-name { font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 700; color: #faf6ee; }
+      .dish-card .dish-desc { font-size: 14px; color: #e6dcc4; margin-top: 6px; line-height: 1.4; }
+      .dish-card .dish-price { position: absolute; top: 16px; right: 16px; background: #eab659; color: #1a1710; font-weight: 700; font-size: 18px; padding: 8px 16px; border-radius: 12px; }
+
+      /* Scene 3 — Chatbot */
+      #scene-chat { background: #0f1626; flex-direction: column; align-items: center; justify-content: center; }
+      #chat-window { width: 520px; background: #16203a; border-radius: 20px; border: 1px solid rgba(232,224,205,0.14); overflow: hidden; opacity: 0; }
+      #chat-header { background: #1c2a4a; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+      #chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: #eab659; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #1a1710; }
+      #chat-header-text h3 { font-size: 15px; font-weight: 600; }
+      #chat-header-text p { font-size: 12px; color: #888; }
+      #chat-messages { padding: 20px; min-height: 280px; }
+      .chat-msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; margin-bottom: 12px; opacity: 0; }
+      .chat-msg.user { background: #eab659; color: #1a1710; margin-left: auto; border-bottom-right-radius: 4px; }
+      .chat-msg.bot { background: #1c2a4a; color: #faf6ee; border-bottom-left-radius: 4px; }
+      .chat-msg img { width: 100%; border-radius: 12px; margin-top: 8px; }
+
+      /* Scene 4 — Menu Grid */
+      #scene-menu { background: #0f1626; flex-direction: column; align-items: center; padding: 60px 120px; }
+      #menu-title { font-family: 'Fraunces', Georgia, serif; font-size: 48px; font-weight: 700; color: #eab659; opacity: 0; margin-bottom: 24px; }
+      #menu-pills { display: flex; gap: 12px; margin-bottom: 32px; opacity: 0; }
+      .pill { padding: 10px 24px; border-radius: 24px; font-size: 14px; font-weight: 500; border: 1px solid rgba(232,224,205,0.14); color: #e6dcc4; }
+      .pill.active { background: #eab659; color: #1a1710; border-color: #eab659; }
+      #menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; }
+      .menu-item { border-radius: 16px; overflow: hidden; border: 1px solid rgba(232,224,205,0.14); opacity: 0; transform: translateY(30px); }
+      .menu-item img { width: 100%; height: 200px; object-fit: cover; }
+      .menu-item .item-info { padding: 16px; background: #16203a; }
+      .menu-item .item-name { font-weight: 600; font-size: 16px; }
+      .menu-item .item-price { color: #eab659; font-weight: 700; font-size: 15px; margin-top: 4px; }
+
+      /* Scene 5 — Outro */
+      #scene-outro { background: #0f1626; flex-direction: column; gap: 20px; }
+      #outro-logo { font-family: 'Fraunces', Georgia, serif; font-size: 80px; font-weight: 900; color: #eab659; opacity: 0; }
+      #outro-tagline { font-size: 28px; color: #e6dcc4; opacity: 0; }
+      #outro-line { width: 0; height: 3px; background: #eab659; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="swahili-dishes"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="15"
+    >
+      <!-- Scene 1: Hook (0-3s) -->
+      <section id="scene-hook" class="clip" data-start="0" data-duration="3">
+        <img id="hook-dish" src="assets/images/pilau.webp" alt="Pilau" />
+        <div id="hook-text">PILAU</div>
+        <div id="hook-sub">ya Nyumbani</div>
+        <div id="hook-price">KSh 850</div>
+        <div id="hook-line"></div>
+      </section>
+
+      <!-- Scene 2: Dish Carousel (2-5s) -->
+      <section id="scene-carousel" class="clip" data-start="2" data-duration="3">
+        <div class="dish-card" id="card-1">
+          <img src="assets/images/pilau.webp" alt="Pilau" />
+          <div class="dish-price">KSh 850</div>
+          <div class="dish-info">
+            <div class="dish-name">Pilau ya Nyumbani</div>
+            <div class="dish-desc">Basmati simmered in cloves, cardamom and cinnamon</div>
+          </div>
+        </div>
+        <div class="dish-card" id="card-2">
+          <img src="assets/images/nyama-choma.webp" alt="Nyama Choma" />
+          <div class="dish-price">KSh 1,100</div>
+          <div class="dish-info">
+            <div class="dish-name">Nyama Choma</div>
+            <div class="dish-desc">Charcoal-grilled to perfection</div>
+          </div>
+        </div>
+        <div class="dish-card" id="card-3">
+          <img src="assets/images/samaki-wa-kupaka.webp" alt="Samaki" />
+          <div class="dish-price">KSh 950</div>
+          <div class="dish-info">
+            <div class="dish-name">Mchuzi wa Samaki</div>
+            <div class="dish-desc">Reef fish in coconut curry</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 3: AI Chatbot (5-9s) -->
+      <section id="scene-chat" class="clip" data-start="5" data-duration="4">
+        <div id="chat-window">
+          <div id="chat-header">
+            <div id="chat-avatar">SD</div>
+            <div id="chat-header-text">
+              <h3>Swahili Dishes</h3>
+              <p>Ask about our menu</p>
+            </div>
+          </div>
+          <div id="chat-messages">
+            <div class="chat-msg user" id="chat-q">Show me what pilau looks like</div>
+            <div class="chat-msg bot" id="chat-a">
+              Here's our Pilau ya Nyumbani!
+              <img src="assets/images/pilau.webp" alt="Pilau" id="chat-photo" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 4: Menu Grid (9-12s) -->
+      <section id="scene-menu" class="clip" data-start="9" data-duration="3">
+        <div id="menu-title">Our Menu</div>
+        <div id="menu-pills">
+          <div class="pill active">All</div>
+          <div class="pill">Mains</div>
+          <div class="pill">Grill</div>
+          <div class="pill">Seafood</div>
+          <div class="pill">Desserts</div>
+        </div>
+        <div id="menu-grid">
+          <div class="menu-item" id="mi-1">
+            <img src="assets/images/pilau.webp" alt="Pilau" />
+            <div class="item-info"><div class="item-name">Pilau</div><div class="item-price">KSh 850</div></div>
+          </div>
+          <div class="menu-item" id="mi-2">
+            <img src="assets/images/nyama-choma.webp" alt="Nyama Choma" />
+            <div class="item-info"><div class="item-name">Nyama Choma</div><div class="item-price">KSh 1,100</div></div>
+          </div>
+          <div class="menu-item" id="mi-3">
+            <img src="assets/images/biryani.webp" alt="Biryani" />
+            <div class="item-info"><div class="item-name">Biryani</div><div class="item-price">KSh 900</div></div>
+          </div>
+          <div class="menu-item" id="mi-4">
+            <img src="assets/images/chapati.webp" alt="Chapati" />
+            <div class="item-info"><div class="item-name">Chapati</div><div class="item-price">KSh 150</div></div>
+          </div>
+          <div class="menu-item" id="mi-5">
+            <img src="assets/images/samaki-wa-kupaka.webp" alt="Samaki" />
+            <div class="item-info"><div class="item-name">Samaki</div><div class="item-price">KSh 950</div></div>
+          </div>
+          <div class="menu-item" id="mi-6">
+            <img src="assets/images/mahamri.webp" alt="Mahamri" />
+            <div class="item-info"><div class="item-name">Mahamri</div><div class="item-price">KSh 200</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 5: Outro (12-15s) -->
+      <section id="scene-outro" class="clip" data-start="12" data-duration="3">
+        <div id="outro-logo">Swahili Dishes</div>
+        <div id="outro-line"></div>
+        <div id="outro-tagline">Taste the coast, from your couch.</div>
+      </section>
+    </div>
+
+    <audio id="music" data-start="0" data-track-index="0" data-volume="0.6" src="assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3"></audio>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1: Hook (0-3s)
+      tl.fromTo("#hook-dish", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" }, 0.2);
+      tl.fromTo("#hook-text", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.7)" }, 0.5);
+      tl.fromTo("#hook-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.8);
+      tl.fromTo("#hook-price", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }, 1.0);
+      tl.to("#hook-line", { width: 400, duration: 0.6, ease: "power2.inOut" }, 1.2);
+
+      // Scene 2: Dish Carousel (2-5s) — cards arrive on beat
+      tl.fromTo("#card-1", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 2.2);
+      tl.fromTo("#card-2", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 2.8);
+      tl.fromTo("#card-3", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 3.4);
+
+      // Scene 3: AI Chatbot (5-9s)
+      tl.fromTo("#chat-window", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 5.2);
+      tl.fromTo("#chat-q", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, 5.6);
+      tl.fromTo("#chat-a", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 6.2);
+      tl.fromTo("#chat-photo", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, 6.6);
+
+      // Scene 4: Menu Grid (9-12s)
+      tl.fromTo("#menu-title", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 9.2);
+      tl.fromTo("#menu-pills", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 9.4);
+      tl.fromTo("#mi-1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 9.6);
+      tl.fromTo("#mi-2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 9.8);
+      tl.fromTo("#mi-3", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 10.0);
+      tl.fromTo("#mi-4", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 10.2);
+      tl.fromTo("#mi-5", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 10.4);
+      tl.fromTo("#mi-6", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }, 10.6);
+
+      // Scene 5: Outro (12-15s)
+      tl.fromTo("#outro-logo", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, 12.2);
+      tl.to("#outro-line", { width: 300, duration: 0.4, ease: "power2.inOut" }, 12.6);
+      tl.fromTo("#outro-tagline", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 12.9);
+
+      // Music fade in
+      tl.fromTo("#music", { volume: 0 }, { volume: 0.6, duration: 0.8, ease: "power2.out" }, 0);
+      // Music fade out
+      tl.to("#music", { volume: 0, duration: 1.5, ease: "power2.in" }, 13.5);
+
+      window.__timelines["swahili-dishes"] = tl;
+    </script>
+  </body>
+</html>
