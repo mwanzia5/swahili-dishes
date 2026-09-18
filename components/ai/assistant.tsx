@@ -103,14 +103,14 @@ export function Assistant() {
     };
     sr.onend = () => setIsListening(false);
     sr.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
       setIsListening(false);
       if (event.error === "not-allowed") {
         alert("Microphone access was denied. Please allow microphone access in your browser settings.");
-      } else if (event.error === "no-speech") {
-        // User clicked mic but didn't speak
       } else if (event.error === "network") {
-        alert("Voice recognition network error. Please try again.");
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", text: "Voice input isn't available right now — try typing instead." },
+        ]);
       }
     };
     setIsListening(true);
