@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addItem } from "components/cart/actions";
 import { useCart } from "components/cart/cart-context";
 
 const categories = ["All dishes", "Starters", "Mains", "Grills", "Sides & salads", "Desserts", "Drinks"];
@@ -53,26 +52,16 @@ export default function MenuPage() {
   });
 
   const handleAddToCart = (dish: (typeof dishes)[number], qty: number) => {
-    // Optimistic UI update
     addCartItem({
-      id: `menu-${Date.now()}-${dish.name}`,
+      id: `menu-${Date.now()}-${dish.name.replace(/\s+/g, "-").toLowerCase()}`,
       cart_id: "",
-      product_id: dish.name,
+      product_id: `menu-${dish.name.replace(/\s+/g, "-").toLowerCase()}`,
       variant_id: null,
       quantity: qty,
       unit_price: String(dish.priceNum),
       extras: [],
       notes: null,
       created_at: new Date().toISOString(),
-    });
-
-    // Fire-and-forget server action (will succeed once products are seeded in DB)
-    addItem(null, {
-      productId: dish.name,
-      quantity: qty,
-      unitPrice: String(dish.priceNum),
-    }).catch(() => {
-      // Graceful — item still shows in cart from optimistic update
     });
 
     setAddedName(dish.name);
@@ -83,14 +72,14 @@ export default function MenuPage() {
     <div>
       {/* Page header */}
       <section
-        className="py-16"
+        className="py-12 sm:py-16"
         style={{ borderBottom: "1px solid var(--color-indigo-line)", background: "radial-gradient(ellipse at 80% 0%, rgba(226,161,58,.10), transparent 55%)" }}
       >
-        <div className="mx-auto max-w-[1180px] px-8">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-8">
           <p className="mb-[14px] text-[0.82rem] text-cream-300">
             <a href="/" className="text-gold-400">Home</a> / <span>Menu</span>
           </p>
-          <h1 className="mb-[10px] text-[clamp(2.4rem,4.2vw,3.8rem)] font-medium text-cream-050" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="mb-[10px] text-[clamp(1.8rem,4.2vw,3.8rem)] font-medium text-cream-050" style={{ fontFamily: "var(--font-display)" }}>
             The full menu
           </h1>
           <p className="mx-auto max-w-xl text-cream-300">
@@ -100,19 +89,35 @@ export default function MenuPage() {
       </section>
 
       {/* Menu content */}
-      <section className="py-12">
-        <div className="mx-auto max-w-[1180px] px-8">
+      <section className="py-8 sm:py-12">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-8">
+          {/* Search box (mobile) */}
+          <div className="mb-6 sm:hidden">
+            <div className="search-box w-full">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search dishes…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
           {/* Toolbar */}
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
+          <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             {/* Category pills */}
-            <div className="flex flex-wrap gap-3" style={{ marginBottom: 0 }}>
+            <div className="flex flex-wrap gap-2 sm:gap-3" style={{ marginBottom: 0 }}>
               {categories.map((cat) => {
                 const val = categoryMap[cat] ?? "all";
                 return (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(val)}
-                    className={`cat-pill ${activeCategory === val ? "active" : ""}`}
+                    className={`cat-pill text-xs sm:text-[0.86rem] ${activeCategory === val ? "active" : ""}`}
                   >
                     {cat}
                   </button>
@@ -120,8 +125,8 @@ export default function MenuPage() {
               })}
             </div>
 
-            {/* Search box */}
-            <div className="search-box">
+            {/* Search box (desktop) */}
+            <div className="hidden sm:flex search-box">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <circle cx="11" cy="11" r="7" />
                 <path d="m21 21-4.3-4.3" />
@@ -141,6 +146,12 @@ export default function MenuPage() {
               <DishCard key={dish.name} dish={dish} onAdd={handleAddToCart} addedName={addedName} />
             ))}
           </div>
+
+          {filtered.length === 0 && (
+            <div className="py-16 text-center text-cream-300">
+              No dishes found. Try a different search or category.
+            </div>
+          )}
         </div>
       </section>
     </div>

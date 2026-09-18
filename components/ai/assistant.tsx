@@ -87,14 +87,20 @@ export function Assistant() {
     }
     const sr = getSpeechRecognition();
     if (!sr) {
-      alert("Voice input is not supported in this browser. Please use Chrome or Edge.");
+      setMessages((prev) => [
+        ...prev,
+        { id: `a-${Date.now()}`, role: "assistant", content: "Voice input is not supported in this browser. Please use Chrome, Edge, or Safari." },
+      ]);
       return;
     }
     recognitionRef.current = sr;
     sr.lang = "en-US";
     sr.interimResults = false;
     sr.continuous = false;
+    let retries = 0;
+    const maxRetries = 2;
     sr.onresult = (event: any) => {
+      retries = 0;
       const transcript = event.results?.[0]?.[0]?.transcript ?? "";
       if (transcript) {
         setInput(transcript);
@@ -105,16 +111,43 @@ export function Assistant() {
     sr.onerror = (event: any) => {
       setIsListening(false);
       if (event.error === "not-allowed") {
-        alert("Microphone access was denied. Please allow microphone access in your browser settings.");
-      } else if (event.error === "network") {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", text: "Voice input isn't available right now — try typing instead." },
+          { id: `a-${Date.now()}`, role: "assistant", content: "Microphone access was denied. Please allow microphone access in your browser settings and try again." },
+        ]);
+      } else if (event.error === "network") {
+        if (!window.isSecureContext) {
+          setMessages((prev) => [
+            ...prev,
+            { id: `a-${Date.now()}`, role: "assistant", content: "Voice input requires HTTPS. Please use the site over HTTPS or type your message instead." },
+          ]);
+        } else if (retries < maxRetries) {
+          retries++;
+          setTimeout(() => {
+            try {
+              setIsListening(true);
+              sr.start();
+            } catch { /* ignore */ }
+          }, 500);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            { id: `a-${Date.now()}`, role: "assistant", content: "Voice input is temporarily unavailable. Please type your message instead." },
+          ]);
+        }
+      } else if (event.error !== "no-speech" && event.error !== "aborted") {
+        setMessages((prev) => [
+          ...prev,
+          { id: `a-${Date.now()}`, role: "assistant", content: "Voice input encountered an error. Please try typing instead." },
         ]);
       }
     };
     setIsListening(true);
-    sr.start();
+    try {
+      sr.start();
+    } catch {
+      setIsListening(false);
+    }
   };
 
   return (

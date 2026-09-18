@@ -3,7 +3,7 @@ import { FavouriteButton } from "./favourite-button";
 import { formatPrice } from "lib/utils";
 import Prose from "components/prose";
 import type { Product, ProductVariant } from "lib/insforge/types";
-import { VariantSelector } from "./variant-selector";
+import { VariantSelectorClient } from "./variant-selector-client";
 
 export function ProductDescription({
   product,
@@ -19,12 +19,12 @@ export function ProductDescription({
   return (
     <>
       <div className="mb-6 flex flex-col border-b pb-6 border-neutral-800">
-        <h1 className="mb-2 text-5xl font-medium text-white">{product.name}</h1>
+        <h1 className="mb-2 text-3xl font-medium text-white sm:text-5xl">{product.name}</h1>
         <div className="mr-auto w-auto rounded-full bg-[var(--color-gold-400)] p-2 text-sm text-white font-medium">
           {formatPrice(product.price)}
         </div>
       </div>
-      <VariantSelector variants={variants} />
+      <VariantSelectorClient variants={variants} productId={product.id} productPrice={product.price} />
       {product.description ? (
         <Prose
           className="mb-6 text-sm leading-tight text-white/60"

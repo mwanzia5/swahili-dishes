@@ -5,15 +5,36 @@ import clsx from "clsx";
 import { addItem } from "components/cart/actions";
 import type { Product, ProductVariant } from "lib/insforge/types";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
 import { useCart } from "./cart-context";
+import { useState, useTransition } from "react";
+
+function findVariantFromParams(
+  variants: ProductVariant[],
+  searchParams: URLSearchParams
+): ProductVariant | null {
+  if (variants.length === 0) return null;
+  if (variants.length === 1) return variants[0] ?? null;
+
+  for (const v of variants) {
+    const opts = v.options ?? {};
+    let match = true;
+    for (const [key, val] of Object.entries(opts)) {
+      if (searchParams.get(key.toLowerCase()) !== val) {
+        match = false;
+        break;
+      }
+    }
+    if (match) return v;
+  }
+  return null;
+}
 
 function SubmitButton({
   isAvailable,
-  selectedVariantId,
+  hasVariant,
 }: {
   isAvailable: boolean;
-  selectedVariantId: string | undefined;
+  hasVariant: boolean;
 }) {
   const buttonClasses =
     "relative flex w-full items-center justify-center rounded-full bg-[var(--color-gold-400)] p-4 tracking-wide text-white font-medium";
@@ -27,30 +48,16 @@ function SubmitButton({
     );
   }
 
-  if (!selectedVariantId) {
-    return (
-      <button
-        aria-label="Please select an option"
-        disabled
-        className={clsx(buttonClasses, disabledClasses)}
-      >
-        <div className="absolute left-0 ml-4">
-          <PlusIcon className="h-5" />
-        </div>
-        Add To Cart
-      </button>
-    );
-  }
-
   return (
     <button
+      type="submit"
       aria-label="Add to cart"
       className={clsx(buttonClasses, "hover:opacity-90")}
     >
       <div className="absolute left-0 ml-4">
         <PlusIcon className="h-5" />
       </div>
-      Add To Cart
+      {!hasVariant ? "Select an option" : "Add To Cart"}
     </button>
   );
 }
@@ -64,47 +71,51 @@ export function AddToCart({
 }) {
   const { variants, is_available } = product;
   const { addCartItem } = useCart();
-  const [message, formAction] = useActionState(addItem, null);
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const variantList = (variants as ProductVariant[]) ?? [];
-  const defaultVariant = variantList.length === 1 ? variantList[0] : null;
-  const variant = selectedVariant ?? defaultVariant;
 
-  const addItemAction = formAction.bind(null, {
-    productId: product.id,
-    variantId: variant?.id,
-    unitPrice: variant?.price ?? product.price,
-    quantity: 1,
-  });
+  // Determine the active variant: prop > URL params > single-variant auto-select
+  const variant =
+    selectedVariant ??
+    (variantList.length > 0 ? findVariantFromParams(variantList, searchParams) : null) ??
+    (variantList.length === 1 ? variantList[0] : null);
 
   const isAvailable = is_available ?? true;
+  const hasVariant = !!variant;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!variant) return;
+
+    // Optimistic UI update
+    addCartItem({
+      id: `optimistic-${Date.now()}`,
+      cart_id: "",
+      product_id: product.id,
+      variant_id: variant.id ?? null,
+      quantity: 1,
+      unit_price: variant.price ?? product.price,
+      extras: [],
+      notes: null,
+      created_at: new Date().toISOString(),
+    });
+
+    // Fire server action (non-blocking)
+    startTransition(() => {
+      addItem(null, {
+        productId: product.id,
+        variantId: variant.id,
+        quantity: 1,
+        unitPrice: variant.price ?? product.price,
+      }).catch(() => {});
+    });
+  };
 
   return (
-    <form
-      action={async () => {
-        addItemAction();
-        if (variant) {
-          addCartItem({
-            id: `optimistic-${Date.now()}`,
-            cart_id: "",
-            product_id: product.id,
-            variant_id: variant.id ?? null,
-            quantity: 1,
-            unit_price: variant.price ?? product.price,
-            extras: [],
-            notes: null,
-            created_at: new Date().toISOString(),
-          });
-        }
-      }}
-    >
-      <SubmitButton
-        isAvailable={isAvailable}
-        selectedVariantId={variant?.id}
-      />
-      <p aria-live="polite" className="sr-only" role="status">
-        {message && (message as any)?.error ? (message as any).error : ""}
-      </p>
+    <form onSubmit={handleSubmit}>
+      <SubmitButton isAvailable={isAvailable} hasVariant={hasVariant} />
     </form>
   );
 }

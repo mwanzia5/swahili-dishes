@@ -116,7 +116,7 @@ export function HeroSection() {
   const goPrev = () => goTo((current - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative overflow-hidden py-[70px] lg:py-[90px]" style={{ background: "var(--color-indigo-950)" }}>
+    <section className="relative overflow-hidden py-10 sm:py-[70px] lg:py-[90px]" style={{ background: "var(--color-indigo-950)" }}>
       {/* Background radial glow */}
       <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 15% 20%, rgba(226,161,58,.10), transparent 45%), radial-gradient(ellipse at 85% 80%, rgba(177,80,47,.14), transparent 50%)" }} />
 
@@ -146,7 +146,7 @@ export function HeroSection() {
         </div>
       )}
 
-      <div className="relative z-10 mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-14 px-8 lg:grid-cols-[1.05fr_1fr]">
+      <div className="relative z-10 mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
         {/* Left copy */}
         <div className="hero-copy">
           <span className="mb-[18px] inline-flex items-center gap-2.5 text-[0.82rem] font-semibold text-gold-400">
@@ -254,12 +254,12 @@ export function HeroSection() {
             />
           </div>
           {/* Price badge */}
-          <div className="hero-badge-anim absolute -left-[22px] -bottom-[22px] rounded-[3px] bg-rust-600 px-[22px] py-4 text-[1.3rem] text-cream-050 shadow-[0_20px_45px_-25px_rgba(15,22,38,0.55)]" style={{ fontFamily: "var(--font-display)" }}>
+          <div className="hero-badge-anim absolute -left-2 -bottom-4 rounded-[3px] bg-rust-600 px-4 py-3 text-[1.1rem] text-cream-050 shadow-[0_20px_45px_-25px_rgba(15,22,38,0.55)] sm:-left-[22px] sm:-bottom-[22px] sm:px-[22px] sm:py-4 sm:text-[1.3rem]" style={{ fontFamily: "var(--font-display)" }}>
             {currentSlide?.price}
             <span className="mt-0.5 block text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-cream-100 opacity-85" style={{ fontFamily: "var(--font-body)" }}>{currentSlide?.badge}</span>
           </div>
           {/* Spice token */}
-          <div className="hero-badge-anim absolute right-[-8%] top-[10%] h-[108px] w-[108px] overflow-hidden rounded-full border-4 border-indigo-950 shadow-[0_20px_45px_-25px_rgba(15,22,38,0.55)]">
+          <div className="hero-badge-anim absolute right-2 top-[8%] h-16 w-16 overflow-hidden rounded-full border-4 border-indigo-950 shadow-[0_20px_45px_-25px_rgba(15,22,38,0.55)] sm:right-[-8%] sm:top-[10%] sm:h-[108px] sm:w-[108px]">
             <img
               src="/images/dishes/spices.webp"
               alt="Whole cloves and cinnamon sticks"
@@ -270,7 +270,7 @@ export function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce sm:bottom-8">
         <div className="h-8 w-5 rounded-full border-2 border-neutral-600">
           <div className="mx-auto mt-2 h-2 w-1 rounded-full bg-neutral-400" />
         </div>

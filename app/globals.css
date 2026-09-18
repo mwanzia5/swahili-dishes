@@ -596,3 +596,135 @@ html.has-motion [data-image-reveal] {
 @media (max-width: 560px) {
   .dish-grid, .recipe-grid { grid-template-columns: 1fr; }
 }
+
+/* =========================================================
+   Mobile Responsive Overrides
+   ========================================================= */
+
+/* Navbar utility bar — hide on small screens */
+@media (max-width: 768px) {
+  .border-b.border-indigo-line.bg-indigo-950.text-cream-300 {
+    display: none;
+  }
+  /* Reduce navbar padding */
+  header .max-w-\[1180px\] {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Hero responsive */
+@media (max-width: 640px) {
+  .arch-frame {
+    border-radius: 120px 120px 12px 12px;
+    aspect-ratio: 3/4;
+  }
+}
+
+/* Cart modal — full width on mobile */
+@media (max-width: 640px) {
+  .fixed.bottom-0.right-0.top-0.w-full {
+    width: 100% !important;
+  }
+}
+
+/* Chat widget — full width on mobile */
+@media (max-width: 480px) {
+  .fixed.bottom-\[90px\].right-5 {
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  .fixed.bottom-5.right-5 {
+    bottom: 1rem !important;
+    right: 1rem !important;
+  }
+}
+
+/* Category pills — scrollable on mobile */
+@media (max-width: 640px) {
+  .category-rail {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+  .category-rail::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Search box — full width on mobile */
+@media (max-width: 640px) {
+  .search-box {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* Dish card body — tighter padding on mobile */
+@media (max-width: 560px) {
+  .dish-body {
+    padding: 12px 14px 16px;
+  }
+  .dish-body h3 {
+    font-size: 0.95rem;
+  }
+  .dish-body p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Auth pages — single column on mobile */
+@media (max-width: 768px) {
+  .auth-wrap {
+    grid-template-columns: 1fr;
+  }
+  .auth-visual {
+    display: none;
+  }
+  .auth-panel {
+    padding: 40px 20px;
+  }
+}
+
+/* Recipe cards — single column on very small screens */
+@media (max-width: 480px) {
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Buttons — slightly smaller on mobile */
+@media (max-width: 640px) {
+  .btn {
+    padding: 0.75em 1.4em;
+    font-size: 0.85rem;
+  }
+}
+
+/* Forms — full width inputs on mobile */
+@media (max-width: 640px) {
+  .form-field input,
+  .form-field textarea,
+  .form-field select {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+}
+
+/* Quantity box — slightly bigger touch targets on mobile */
+@media (max-width: 640px) {
+  .qty-box button {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  .add-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+}

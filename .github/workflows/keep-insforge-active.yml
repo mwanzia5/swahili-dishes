@@ -1,0 +1,17 @@
+name: Keep InsForge Active
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping InsForge REST API
+        run: |
+          curl -sf https://cqevp9xs.us-east.insforge.app/rest/v1/ \
+            -H "apikey: ${{ secrets.NEXT_PUBLIC_INSFORGE_ANON_KEY }}" \
+            -o /dev/null && echo "InsForge is alive" || echo "Ping failed"

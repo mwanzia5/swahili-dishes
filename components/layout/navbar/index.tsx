@@ -14,7 +14,7 @@ export async function Navbar() {
   return (
     <>
       {/* Utility bar */}
-      <div className="border-b border-indigo-line bg-indigo-950 text-[0.78rem] text-cream-300">
+      <div className="border-b border-indigo-line bg-indigo-950 text-[0.78rem] text-cream-300 hidden md:block">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-x-5 gap-y-1.5 px-8 py-2.5">
           <div className="flex items-center gap-5.5">
             <span>Mon – Sun · <strong className="text-gold-400 font-semibold">11:00 – 23:00</strong></span>

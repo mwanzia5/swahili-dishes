@@ -4,14 +4,14 @@ import Link from "next/link";
 
 export function FeaturedSection() {
   return (
-    <section className="relative overflow-hidden py-24" style={{ background: "var(--color-indigo-950)" }} data-mouse-parallax>
+    <section className="relative overflow-hidden py-16 sm:py-24" style={{ background: "var(--color-indigo-950)" }} data-mouse-parallax>
       {/* Background glow */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold-400/5 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1180px] px-8">
-        <div className="grid items-center gap-[60px] lg:grid-cols-2" data-reveal="slide-right">
+      <div className="relative z-10 mx-auto max-w-[1180px] px-4 sm:px-8">
+        <div className="grid items-center gap-8 sm:gap-[60px] lg:grid-cols-2" data-reveal="slide-right">
           {/* Left content */}
           <div>
             <span className="mb-4 inline-block text-[0.85rem] font-semibold text-gold-400">Signature grill</span>
@@ -70,9 +70,9 @@ export function FeaturedSection() {
             </div>
 
             {/* Floating rating badge */}
-            <div className="absolute -right-8 -top-8 z-20 rounded-2xl bg-rust-600 p-6 shadow-2xl" data-mouse-depth="0.06" data-mouse-parallax>
-              <div className="text-3xl font-bold text-white">4.9</div>
-              <div className="text-sm text-white/80">Rating</div>
+            <div className="absolute -right-2 -top-4 z-20 rounded-2xl bg-rust-600 p-4 shadow-2xl sm:-right-8 sm:-top-8 sm:p-6" data-mouse-depth="0.06" data-mouse-parallax>
+              <div className="text-2xl font-bold text-white sm:text-3xl">4.9</div>
+              <div className="text-xs text-white/80 sm:text-sm">Rating</div>
               <div className="mt-1 flex text-gold-400">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
@@ -85,7 +85,7 @@ export function FeaturedSection() {
         </div>
 
         {/* CTA */}
-        <div className="mt-20 text-center" data-reveal="fade-up">
+        <div className="mt-12 text-center sm:mt-20" data-reveal="fade-up">
           <Link
             href="/recipes"
             className="btn btn-primary px-10 py-5 text-lg"

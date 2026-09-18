@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { gsap } from "gsap";
 import Link from "next/link";
+import { useCart } from "components/cart/cart-context";
 
 const categories = ["All", "Mains", "Grills", "Starters", "Drinks"];
 
@@ -81,8 +82,7 @@ const menuItems = [
   },
 ];
 
-function QuantityBox() {
-  const [qty, setQty] = useState(1);
+function QuantityBox({ qty, setQty }: { qty: number; setQty: (n: number) => void }) {
   return (
     <div className="qty-box">
       <button aria-label="Decrease" onClick={() => setQty(Math.max(1, qty - 1))}>–</button>
@@ -94,6 +94,9 @@ function QuantityBox() {
 
 export function MenuPreview() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [addedId, setAddedId] = useState<number | null>(null);
+  const { addCartItem } = useCart();
 
   const filteredItems = activeCategory === "All"
     ? menuItems
@@ -108,25 +111,42 @@ export function MenuPreview() {
     );
   };
 
+  const handleAddToCart = (item: (typeof menuItems)[number]) => {
+    const qty = quantities[item.id] ?? 1;
+    addCartItem({
+      id: `preview-${item.id}-${Date.now()}`,
+      cart_id: "",
+      product_id: `menu-${item.name.replace(/\s+/g, "-").toLowerCase()}`,
+      variant_id: null,
+      quantity: qty,
+      unit_price: String(item.price),
+      extras: [],
+      notes: null,
+      created_at: new Date().toISOString(),
+    });
+    setAddedId(item.id);
+    setTimeout(() => setAddedId(null), 1500);
+  };
+
   return (
-    <section className="py-24" style={{ background: "var(--color-indigo-900)" }} id="menu">
-      <div className="mx-auto max-w-[1180px] px-8">
+    <section className="py-16 sm:py-24" style={{ background: "var(--color-indigo-900)" }} id="menu">
+      <div className="mx-auto max-w-[1180px] px-4 sm:px-8">
         {/* Section header */}
-        <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-8 sm:mb-12 flex flex-col gap-4 sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
           <div>
             <span className="mb-2 block text-[0.82rem] font-semibold text-gold-400">From the kitchen</span>
-            <h2 className="mb-2 text-[clamp(1.9rem,3vw,2.6rem)]" style={{ fontFamily: "var(--font-display)" }}>A taste of the menu</h2>
+            <h2 className="mb-2 text-[clamp(1.5rem,3vw,2.6rem)]" style={{ fontFamily: "var(--font-display)" }}>A taste of the menu</h2>
           </div>
           <p className="text-cream-300">Eight coastal favourites, made fresh to order — from Zanzibar to Lamu.</p>
         </div>
 
         {/* Category pills */}
-        <div className="category-rail mb-[44px]" data-reveal="fade-up">
+        <div className="category-rail mb-8 sm:mb-[44px]" data-reveal="fade-up">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`cat-pill ${activeCategory === category ? "active" : ""}`}
+              className={`cat-pill text-xs sm:text-[0.86rem] ${activeCategory === category ? "active" : ""}`}
             >
               {category}
             </button>
@@ -154,8 +174,18 @@ export function MenuPreview() {
                 <h3 className="text-[1.08rem] font-semibold text-cream-050" style={{ fontFamily: "var(--font-display)" }}>{item.name}</h3>
                 <p className="mb-[14px] text-[0.86rem] text-cream-300">{item.description}</p>
                 <div className="dish-foot">
-                  <QuantityBox />
-                  <button className="add-btn" aria-label={`Add ${item.name} to cart`}>+</button>
+                  <QuantityBox
+                    qty={quantities[item.id] ?? 1}
+                    setQty={(n) => setQuantities((prev) => ({ ...prev, [item.id]: n }))}
+                  />
+                  <button
+                    className="add-btn"
+                    aria-label={`Add ${item.name} to cart`}
+                    onClick={() => handleAddToCart(item)}
+                    style={addedId === item.id ? { background: "var(--color-gold-500)", transform: "scale(1.1)" } : undefined}
+                  >
+                    {addedId === item.id ? "✓" : "+"}
+                  </button>
                 </div>
               </div>
             </article>
@@ -163,7 +193,7 @@ export function MenuPreview() {
         </div>
 
         {/* View all */}
-        <div className="mt-[44px] text-center" data-reveal="fade-up">
+        <div className="mt-8 sm:mt-[44px] text-center" data-reveal="fade-up">
           <Link href="/menu" className="btn btn-outline">
             See the full menu
           </Link>

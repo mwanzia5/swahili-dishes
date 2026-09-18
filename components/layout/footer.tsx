@@ -13,10 +13,10 @@ export default async function Footer() {
   const copyrightName = COMPANY_NAME || SITE_NAME || "Swahili Dishes";
 
   return (
-    <footer className="border-t border-indigo-line bg-indigo-950 pt-[70px]">
-      <div className="mx-auto max-w-[1180px] px-8">
+    <footer className="border-t border-indigo-line bg-indigo-950 pt-12 sm:pt-[70px]">
+      <div className="mx-auto max-w-[1180px] px-4 sm:px-8">
         {/* Footer grid */}
-        <div className="grid grid-cols-1 gap-10 pb-[50px] sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:gap-10" style={{ borderBottom: "1px solid var(--color-indigo-line)" }}>
+        <div className="grid grid-cols-1 gap-8 pb-10 sm:grid-cols-2 sm:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]" style={{ borderBottom: "1px solid var(--color-indigo-line)" }}>
           {/* Brand column */}
           <div>
             <Link href="/" className="mb-4 inline-flex items-center gap-3">
