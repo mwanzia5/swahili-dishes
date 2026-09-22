@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { gsap } from "gsap";
 import Link from "next/link";
 import { useCart } from "components/cart/cart-context";
+import { addItem } from "components/cart/actions";
 
 const categories = ["All", "Mains", "Grills", "Starters", "Drinks"];
 
@@ -96,6 +97,7 @@ export function MenuPreview() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [addedId, setAddedId] = useState<number | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { addCartItem } = useCart();
 
   const filteredItems = activeCategory === "All"
@@ -123,6 +125,15 @@ export function MenuPreview() {
       extras: [],
       notes: null,
       created_at: new Date().toISOString(),
+    });
+    // Fire server action to persist to DB
+    startTransition(() => {
+      addItem(null, {
+        productId: `menu-${item.name.replace(/\s+/g, "-").toLowerCase()}`,
+        variantId: null,
+        quantity: qty,
+        unitPrice: String(item.price),
+      }).catch(() => {});
     });
     setAddedId(item.id);
     setTimeout(() => setAddedId(null), 1500);

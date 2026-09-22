@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useCart } from "components/cart/cart-context";
+import { addItem } from "components/cart/actions";
 
 const categories = ["All dishes", "Starters", "Mains", "Grills", "Sides & salads", "Desserts", "Drinks"];
 
@@ -51,7 +52,10 @@ export default function MenuPage() {
     return matchCat && matchSearch;
   });
 
+  const [isPending, startTransition] = useTransition();
+
   const handleAddToCart = (dish: (typeof dishes)[number], qty: number) => {
+    // Optimistic UI update
     addCartItem({
       id: `menu-${Date.now()}-${dish.name.replace(/\s+/g, "-").toLowerCase()}`,
       cart_id: "",
@@ -62,6 +66,16 @@ export default function MenuPage() {
       extras: [],
       notes: null,
       created_at: new Date().toISOString(),
+    });
+
+    // Fire server action (non-blocking) to persist to DB
+    startTransition(() => {
+      addItem(null, {
+        productId: `menu-${dish.name.replace(/\s+/g, "-").toLowerCase()}`,
+        variantId: null,
+        quantity: qty,
+        unitPrice: String(dish.priceNum),
+      }).catch(() => {});
     });
 
     setAddedName(dish.name);
