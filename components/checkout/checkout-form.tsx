@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { submitOrder } from "app/checkout/actions";
 import type { CheckoutResult } from "app/checkout/actions";
-import { PAYMENT_METHODS } from "lib/payments";
+import { PAYMENT_METHODS, paymentMethodAvailable } from "lib/payments";
 
 const inputBase =
   "w-full rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3 text-sm text-white placeholder-cream-300/50 outline-none transition focus:border-[var(--color-gold-400)]";
@@ -143,7 +143,7 @@ export default function CheckoutForm({ hasAccount }: { hasAccount: boolean }) {
       <section className="rounded-2xl border border-neutral-800 bg-neutral-950 p-6">
         <h2 className="mb-4 text-lg font-medium text-white">Payment</h2>
         <div className="space-y-2" role="radiogroup" aria-label="Payment method">
-          {PAYMENT_METHODS.map((m) => (
+          {PAYMENT_METHODS.filter((m) => paymentMethodAvailable(m.value)).map((m) => (
             <label
               key={m.value}
               className={
@@ -163,10 +163,14 @@ export default function CheckoutForm({ hasAccount }: { hasAccount: boolean }) {
               <div>
                 <p className="text-sm font-medium text-white">{m.label}</p>
                 <p className="mt-0.5 text-xs text-neutral-500">{m.description}</p>
-                {m.requiresConfig && <p className="mt-1 text-xs text-yellow-500">Coming soon — not available yet.</p>}
               </div>
             </label>
           ))}
+          {PAYMENT_METHODS.filter((m) => !paymentMethodAvailable(m.value)).length > 0 && (
+            <p className="text-xs text-yellow-500">
+              Some payment methods are not configured yet.
+            </p>
+          )}
         </div>
         {state?.fieldErrors?.paymentMethod ? (
           <p className="mt-3 text-sm text-red-400">{state.fieldErrors.paymentMethod}</p>

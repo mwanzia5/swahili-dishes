@@ -1,5 +1,41 @@
 import { getAdminClient } from "./admin";
-import type { Cart, CartItem } from "./types";
+import type { Cart, CartItem, Product } from "./types";
+
+function normalizeCartItem(item: any): CartItem {
+  return {
+    ...item,
+    product: item.product?.[0] ? {
+      id: item.product[0].id,
+      slug: item.product[0].slug,
+      name: item.product[0].name,
+      image_url: item.product[0].image_url,
+      description: null,
+      price: "0",
+      compare_at_price: null,
+      currency: "KES",
+      category_id: null,
+      ingredients: [],
+      allergens: [],
+      prep_time_minutes: null,
+      is_published: true,
+      is_available: true,
+      is_featured: false,
+      is_popular: false,
+      rating: "0",
+      rating_count: 0,
+      created_at: "",
+      updated_at: "",
+    } as Product : null,
+  };
+}
+
+function normalizeCart(data: any): Cart | null {
+  if (!data) return null;
+  return {
+    ...data,
+    items: data.items?.map(normalizeCartItem) ?? [],
+  };
+}
 
 /**
  * Read a cart by session token or user_id. Guest carts use session_token;
@@ -18,7 +54,7 @@ export async function getCartFromDB(opts: {
 
   let q = admin.database
     .from("carts")
-    .select("*, items:cart_items(id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at)")
+    .select("*, items:cart_items(id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at, product:products(id, slug, name, image_url))")
     .eq("status", "ACTIVE")
     .order("created_at", { referencedTable: "cart_items" })
     .limit(200, { referencedTable: "cart_items" });
@@ -38,7 +74,7 @@ export async function getCartFromDB(opts: {
     }
     return null;
   }
-  return data as Cart | null;
+  return normalizeCart(data);
 }
 
 /**
@@ -121,11 +157,11 @@ export async function addItemToCart(opts: {
   // Return updated cart items
   const { data: items } = await admin.database
     .from("cart_items")
-    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at")
+    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at, product:products(id, slug, name, image_url)")
     .eq("cart_id", cartId)
     .order("created_at", { ascending: true });
 
-  return (items as CartItem[]) ?? [];
+  return (items?.map(normalizeCartItem) ?? []) as CartItem[];
 }
 
 /**
@@ -146,11 +182,11 @@ export async function updateCartItemQuantity(
 
   const { data: items } = await admin.database
     .from("cart_items")
-    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at")
+    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at, product:products(id, slug, name, image_url)")
     .eq("cart_id", cartId)
     .order("created_at", { ascending: true });
 
-  return (items as CartItem[]) ?? [];
+  return (items?.map(normalizeCartItem) ?? []) as CartItem[];
 }
 
 /**
@@ -162,11 +198,11 @@ export async function removeCartItem(cartId: string, itemId: string): Promise<Ca
 
   const { data: items } = await admin.database
     .from("cart_items")
-    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at")
+    .select("id, cart_id, product_id, variant_id, quantity, unit_price, extras, notes, created_at, product:products(id, slug, name, image_url)")
     .eq("cart_id", cartId)
     .order("created_at", { ascending: true });
 
-  return (items as CartItem[]) ?? [];
+  return (items?.map(normalizeCartItem) ?? []) as CartItem[];
 }
 
 /**
