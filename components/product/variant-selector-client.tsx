@@ -22,7 +22,7 @@ export function useSelectedVariant() {
 function getVariantOptionKey(variant: ProductVariant): string {
   const opts = variant.options;
   if (opts && Object.keys(opts).length > 0) {
-    return Object.keys(opts)[0];
+    return Object.keys(opts)[0] as string;
   }
   return "portion";
 }
@@ -30,7 +30,7 @@ function getVariantOptionKey(variant: ProductVariant): string {
 function getVariantOptionValue(variant: ProductVariant): string {
   const opts = variant.options;
   if (opts && Object.keys(opts).length > 0) {
-    return Object.values(opts)[0];
+    return Object.values(opts)[0] as string;
   }
   return variant.title;
 }
