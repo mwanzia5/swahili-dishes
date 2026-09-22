@@ -78,9 +78,12 @@ export async function signUp(
   const auth = createAuthActions({ cookies: await cookies() });
   const { data, error } = await auth.signUp({ email, password });
 
-  if (error || !data?.user) {
+  if (error) {
     console.error("SignUp error:", error);
-    return { error: error?.message ?? "Could not create your account. Try again." };
+    return { error: error.message };
+  }
+  if (!data?.user) {
+    return { error: "Account created but requires verification. Check your email/phone for the code." };
   }
 
   // Create the profile row
