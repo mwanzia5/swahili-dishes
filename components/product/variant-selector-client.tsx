@@ -19,6 +19,20 @@ export function useSelectedVariant() {
   return useContext(VariantContext);
 }
 
+function getVariantOptionKey(variant: ProductVariant): string {
+  return variant.options ? Object.keys(variant.options)[0] : "portion";
+}
+
+function getVariantOptionValue(variant: ProductVariant): string {
+  if (variant.options) return Object.values(variant.options)[0];
+  return variant.title;
+}
+
+function buildVariantOptionMap(variant: ProductVariant): Record<string, string> {
+  if (variant.options) return variant.options;
+  return { [getVariantOptionKey(variant)]: getVariantOptionValue(variant) };
+}
+
 export function VariantSelectorClient({
   variants,
   productId,
@@ -31,14 +45,13 @@ export function VariantSelectorClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Find initial variant from URL params
   const findVariantFromParams = (): ProductVariant | null => {
     if (variants.length === 0) return null;
     if (variants.length === 1) return variants[0] ?? null;
 
     const params = new URLSearchParams(searchParams.toString());
     for (const v of variants) {
-      const opts = v.options ?? {};
+      const opts = buildVariantOptionMap(v);
       let match = true;
       for (const [key, val] of Object.entries(opts)) {
         if (params.get(key.toLowerCase()) !== val) {
@@ -56,8 +69,7 @@ export function VariantSelectorClient({
   const extractOptions = (variants: ProductVariant[]): { name: string; values: string[] }[] => {
     const optionMap = new Map<string, Set<string>>();
     for (const v of variants) {
-      const opts = v.options ?? null;
-      if (!opts) continue;
+      const opts = buildVariantOptionMap(v);
       for (const [name, value] of Object.entries(opts)) {
         if (!optionMap.has(name)) optionMap.set(name, new Set());
         optionMap.get(name)!.add(value);
@@ -75,7 +87,7 @@ export function VariantSelectorClient({
   const combinations = variants.map((variant) => ({
     id: variant.id,
     available: variant.is_active ?? true,
-    optionMap: variant.options ?? {},
+    optionMap: buildVariantOptionMap(variant),
   }));
 
   const updateOption = (name: string, value: string) => {
@@ -83,7 +95,6 @@ export function VariantSelectorClient({
     params.set(name, value);
     router.replace(`?${params.toString()}`, { scroll: false });
 
-    // Find the matching variant
     const params2 = new URLSearchParams(params.toString());
     const matching = combinations.find((combo) =>
       Object.entries(combo.optionMap).every(([key, val]) => params2.get(key) === val)

@@ -8,6 +8,11 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "./cart-context";
 import { useState, useTransition } from "react";
 
+function buildVariantOptionMap(variant: ProductVariant): Record<string, string> {
+  if (variant.options) return variant.options;
+  return { portion: variant.title };
+}
+
 function findVariantFromParams(
   variants: ProductVariant[],
   searchParams: URLSearchParams
@@ -16,7 +21,7 @@ function findVariantFromParams(
   if (variants.length === 1) return variants[0] ?? null;
 
   for (const v of variants) {
-    const opts = v.options ?? {};
+    const opts = buildVariantOptionMap(v);
     let match = true;
     for (const [key, val] of Object.entries(opts)) {
       if (searchParams.get(key.toLowerCase()) !== val) {
