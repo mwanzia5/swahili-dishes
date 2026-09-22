@@ -72,7 +72,7 @@ export default function MenuPage() {
     startTransition(() => {
       addItem(null, {
         productId: `menu-${dish.name.replace(/\s+/g, "-").toLowerCase()}`,
-        variantId: null,
+        variantId: undefined,
         quantity: qty,
         unitPrice: String(dish.priceNum),
       }).catch(() => {});

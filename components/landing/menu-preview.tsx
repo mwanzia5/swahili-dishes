@@ -130,7 +130,7 @@ export function MenuPreview() {
     startTransition(() => {
       addItem(null, {
         productId: `menu-${item.name.replace(/\s+/g, "-").toLowerCase()}`,
-        variantId: null,
+        variantId: undefined,
         quantity: qty,
         unitPrice: String(item.price),
       }).catch(() => {});
