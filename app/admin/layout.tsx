@@ -5,6 +5,8 @@ import { createServerClient } from "@insforge/sdk/ssr";
 import { getAdminClient } from "lib/insforge/admin";
 import type { ReactNode } from "react";
 
+export const dynamic = "force-dynamic";
+
 const nav = [
   { title: "Overview", path: "/admin" },
   { title: "Orders", path: "/admin/orders" },
