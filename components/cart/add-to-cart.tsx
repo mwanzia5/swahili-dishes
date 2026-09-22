@@ -9,7 +9,7 @@ import { useCart } from "./cart-context";
 import { useState, useTransition } from "react";
 
 function buildVariantOptionMap(variant: ProductVariant): Record<string, string> {
-  if (variant.options) return variant.options;
+  if (variant.options && Object.keys(variant.options).length > 0) return variant.options;
   return { portion: variant.title };
 }
 

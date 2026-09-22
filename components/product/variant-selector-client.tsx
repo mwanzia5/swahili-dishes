@@ -20,16 +20,21 @@ export function useSelectedVariant() {
 }
 
 function getVariantOptionKey(variant: ProductVariant): string {
-  return variant.options ? Object.keys(variant.options)[0] : "portion";
+  if (variant.options && Object.keys(variant.options).length > 0) {
+    return Object.keys(variant.options)[0];
+  }
+  return "portion";
 }
 
 function getVariantOptionValue(variant: ProductVariant): string {
-  if (variant.options) return Object.values(variant.options)[0];
+  if (variant.options && Object.keys(variant.options).length > 0) {
+    return Object.values(variant.options)[0];
+  }
   return variant.title;
 }
 
 function buildVariantOptionMap(variant: ProductVariant): Record<string, string> {
-  if (variant.options) return variant.options;
+  if (variant.options && Object.keys(variant.options).length > 0) return variant.options;
   return { [getVariantOptionKey(variant)]: getVariantOptionValue(variant) };
 }
 
