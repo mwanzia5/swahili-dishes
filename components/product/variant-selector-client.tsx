@@ -20,15 +20,17 @@ export function useSelectedVariant() {
 }
 
 function getVariantOptionKey(variant: ProductVariant): string {
-  if (variant.options && Object.keys(variant.options).length > 0) {
-    return Object.keys(variant.options)[0];
+  const opts = variant.options;
+  if (opts && Object.keys(opts).length > 0) {
+    return Object.keys(opts)[0];
   }
   return "portion";
 }
 
 function getVariantOptionValue(variant: ProductVariant): string {
-  if (variant.options && Object.keys(variant.options).length > 0) {
-    return Object.values(variant.options)[0];
+  const opts = variant.options;
+  if (opts && Object.keys(opts).length > 0) {
+    return Object.values(opts)[0];
   }
   return variant.title;
 }
